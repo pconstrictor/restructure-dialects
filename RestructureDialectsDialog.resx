@@ -117,4 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="textBoxDetails.Text" xml:space="preserve">
+    <value>and swap the pair of fields with the main entry's pair. Each dialect should use a unique one-letter code.
+
+WARNINGS:
+- The Summary Definition field must be used exclusively as a Dialect Labels field. (I.e. it's been hijacked.)
+- For dialectal variants, the ONLY fields that should be filled in are Lexeme Form and Summary Definition.
+  All other fields should go on the main entry, since they will not be swapped.
+- Where there are multiple variants that beat the main entry, an arbitrary winner will be chosen.
+- If anything goes wrong, filter the main Lexeme Form for } or {, since a backup like this is placed there first:
+  coke[W] {pop[NS]}</value>
+  </data>
 </root>

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace RestructureDialects
+namespace MacroRestructureDialects
 {
     public partial class RestructureDialectsDialog : Form
     {

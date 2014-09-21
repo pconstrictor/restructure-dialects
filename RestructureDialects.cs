@@ -3,18 +3,13 @@
 // Created by Jonathan Coombs (SIL), Sep 2014
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Text;
 using System.Windows.Forms;
-using SIL.CoreImpl;
-using SIL.FieldWorks.Common.COMInterfaces;
 using SIL.FieldWorks.FDO;
 using SIL.FieldWorks.XWorks;
-using SIL.FieldWorks.XWorks.Archiving;
 
-namespace RestructureDialects
+namespace MacroRestructureDialects
 {
     /// <summary>
     /// To make this FLEx macro show up in the Tools menu, drop the resulting DLL into output/debug (or wherever FLEx is executing).
@@ -25,6 +20,7 @@ namespace RestructureDialects
     /// - variants ('SW', 'S', 'N') of an 'NW' main entry: the 'SW' variant wins. ('SW' is more complete than 'S'.)
     /// - variant ('N') of a 'W' main entry: the 'N' variant wins. (Since the control is 'SNW', not 'SWN'.)
     /// - variants ('SNW', 'S', 'SN') of an 'S' main entry: no change. ('SNW' is best, but the main entry is 'good enough'.)
+    /// - variant ('S') of an unmarked main entry: no change. (We don't know enough.)
     /// For WARNINGS, see the constant below (and RestructureDialectsDialog.cs)
     /// </summary>
     public class RestructureDialects : IFlexMacro
@@ -61,7 +57,7 @@ WARNINGS:
         /// </summary>
         public void RunMacro(ICmObject target, int targetField, int wsId, int start, int length)
         {
-            main(target);
+            Main(target);
         }
 
         public Keys PreferredFunctionKey
@@ -73,10 +69,10 @@ WARNINGS:
         // =====================================================
         // Things needed by the task itself...
 
-        private void main(ICmObject target)
+        private void Main(ICmObject target)
         {
             var f = new RestructureDialectsDialog();
-            DialogResult result = f.ShowDialog();
+            f.ShowDialog();
             if (f.DialogResult == DialogResult.Cancel) return;
 
             var esb = new StringBuilder();
@@ -113,24 +109,24 @@ WARNINGS:
                 }
             }
 
-            MessageBox.Show(esb.ToString(), "Made " + i + " swaps. Done restructuring to " + f.GetPeckingOrder());
+            MessageBox.Show(esb.ToString(), f.GetPeckingOrder() + ": Made " + i + " swaps. Done restructuring.");
 
         }
 
         private string Swap(ILexEntry entry, ILexEntry vWinner)
         {
             string lexeme = GetLexeme(entry);
-            string dialects = getDialects(entry);
+            string dialects = GetDialects(entry);
             string vLexeme = GetLexeme(vWinner);
-            string vDialects = getDialects(vWinner);
+            string vDialects = GetDialects(vWinner);
 
             // first, "back up" a complete copy of the data in the main entry (in case we crash)
             string complete = String.Format("{0}[{1}] {{{2}[{3}]}}", lexeme, dialects, vLexeme, vDialects);
             SetLexeme(entry, complete); 
 
-            setDialects(entry, vDialects);
+            SetDialects(entry, vDialects);
             SetLexeme(vWinner, lexeme);
-            setDialects(vWinner, dialects);
+            SetDialects(vWinner, dialects);
             SetLexeme(entry, vLexeme); //overwrite the backup
 
             return complete;
@@ -142,15 +138,20 @@ WARNINGS:
         private ILexEntry GetWinningVariant(ILexEntry mainEntry, string peckingOrder)
         {
             string mainDialect = peckingOrder.Substring(0,1);
-            string d = getDialects(mainEntry);
-            if (d.Contains(mainDialect))
+            string d = GetDialects(mainEntry);
+            if (String.IsNullOrEmpty(d) || d.Contains(mainDialect))
             {
-                return null; // main entry is already fine
+                return null; // main entry is already fine, or we don't know enough about its dialect
             }
 
-            var vcoll = mainEntry.VariantFormEntries;
+            if (mainEntry.VariantFormEntries == null)
+            {
+                return null; // filter out anything that's not a main entry with variants
+            }
 
-            if (vcoll == null || vcoll.ToList().Count < 1)
+            var vcoll = mainEntry.VariantFormEntries.ToList();
+
+            if (vcoll.Count < 1)
             {
                 return null; // filter out anything that's not a main entry with variants
             }
@@ -180,8 +181,8 @@ WARNINGS:
         /// </summary>
         private ILexEntry Compare(ILexEntry entry1, ILexEntry entry2, string peckingOrder)
         {
-            string d1 = getDialects(entry1);
-            string d2 = getDialects(entry2);
+            string d1 = GetDialects(entry1);
+            string d2 = GetDialects(entry2);
             foreach(var c in peckingOrder)
             {
                 if (!d2.Contains(c)) return entry1;
@@ -194,8 +195,8 @@ WARNINGS:
         // =====================================================
         // Things needed just for accessing the FLEx data model...
 
-        private int _vern = 0;
-        private int _ana = 0;
+        private int _vern;
+        private int _ana;
         private readonly SpecialWritingSystemCodes _anaBest = SpecialWritingSystemCodes.BestAnalysis;
         private string _dvName = DialectalVariantName;
 
@@ -208,7 +209,7 @@ WARNINGS:
         {
             foreach (var t in variant.VariantEntryRefs)
             {
-                foreach (var t2 in t.VariantEntryTypesRS)
+                foreach (var t2 in t.VariantEntryTypesRS)  // not sure why this extra loop is needed (an FDO complexity...)
                 {
                     string tmp = t2.Name.GetAlternative(_anaBest);
                     if (tmp == _dvName)
@@ -242,7 +243,7 @@ WARNINGS:
         /// dialect the entry applies to. Currently, a hijacked Summary Def is just about the only field usable for 
         /// this purpose that is also decently publishable.
         /// </summary>
-        private string getDialects(ILexEntry entry)
+        private string GetDialects(ILexEntry entry)
         {
             string s = entry.SummaryDefinition.get_String(_ana).Text;
             if (s == null) return "";
@@ -251,7 +252,7 @@ WARNINGS:
         /// <summary>
         /// See getDialects()
         /// </summary>
-        private void setDialects(ILexEntry entry, string val)
+        private void SetDialects(ILexEntry entry, string val)
         {
             entry.SummaryDefinition.set_String(_ana, val);
         }

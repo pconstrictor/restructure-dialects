@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2014 SIL International
 // Licensed under the MIT license: opensource.org/licenses/MIT
 
-namespace RestructureDialects
+namespace MacroRestructureDialects
 {
     partial class RestructureDialectsDialog
     {
@@ -31,6 +31,7 @@ namespace RestructureDialects
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RestructureDialectsDialog));
             this.tableNested = new System.Windows.Forms.TableLayoutPanel();
             this.DialectOrderTextBox = new System.Windows.Forms.TextBox();
             this.VariantTypeTextBox = new System.Windows.Forms.TextBox();
@@ -143,8 +144,8 @@ namespace RestructureDialects
             this.textBox3.Size = new System.Drawing.Size(370, 32);
             this.textBox3.TabIndex = 3;
             this.textBox3.TabStop = false;
-            this.textBox3.Text = "whose main entry doesn\'t already apply to the primary dialect, select a winner by" +
-                " this priority...";
+            this.textBox3.Text = "whose main entry is marked and doesn\'t already apply to the primary dialect, sele" +
+                "ct a winner by this priority...";
             // 
             // textBox5
             // 
@@ -237,7 +238,7 @@ namespace RestructureDialects
             this.textBoxDetails.Size = new System.Drawing.Size(510, 123);
             this.textBoxDetails.TabIndex = 7;
             this.textBoxDetails.TabStop = false;
-            this.textBoxDetails.Text = RestructureDialects.Warnings;
+            this.textBoxDetails.Text = resources.GetString("textBoxDetails.Text");
             // 
             // RestructureDialectsDialog
             // 

@@ -173,7 +173,7 @@ namespace MacroRestructureDialects
             this.maxEntriesNumericUpDown.Size = new System.Drawing.Size(120, 20);
             this.maxEntriesNumericUpDown.TabIndex = 5;
             this.maxEntriesNumericUpDown.Value = new decimal(new int[] {
-            15,
+            14,
             0,
             0,
             0});

@@ -16,7 +16,7 @@ namespace MacroRestructureDialects
     /// This macro switches which dialect is the 'primary' or 'reference' dialect the project focuses on. 
     /// It does this by swapping the two fields that are stored in a Dialect Variant with the same two fields in the main entry.
     /// The 'winning' variant must fit the control string best, and the main entry must fail to cover the main dialect. 
-    /// These examples assume an 'SNW' control string / pecking order:
+    /// These examples assume the macro was asked to produce 'SNW':
     /// - variants ('SW', 'S', 'N') of an 'NW' main entry: the 'SW' variant wins. ('SW' is more complete than 'S'.)
     /// - variant ('N') of a 'W' main entry: the 'N' variant wins. (Since the control is 'SNW', not 'SWN'.)
     /// - variants ('SNW', 'S', 'SN') of an 'S' main entry: no change. ('SNW' is best, but the main entry is 'good enough'.)
@@ -48,7 +48,7 @@ WARNINGS:
 
         public bool Enabled(ICmObject target, int targetField, int wsId, int start, int length)
         {
-            return true;
+            if (target != null) return true;  //TODO: figure out how to not need target
         }
 
 
@@ -79,6 +79,8 @@ WARNINGS:
             esb.AppendLine("Original pairs prior to swapping: ");
 
             //var sda = target.Cache.DomainDataByFlid;
+
+            //TODO: figure out how to not need target
 
             ILexEntryRepository repo = target.Cache.ServiceLocator.GetInstance<ILexEntryRepository>();
             var wsRepo = target.Cache.ServiceLocator.GetInstance<IWritingSystemContainer>();
